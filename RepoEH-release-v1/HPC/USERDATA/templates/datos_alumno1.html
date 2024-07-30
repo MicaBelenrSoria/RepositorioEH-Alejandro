@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Mis datos de la Db local</h1>
+<ul>
+    {% for datos in alumno %}
+    <li>{{ datos }}</li>
+{% endfor %}
+li.textContent = `Alumno: ${alumno}, Sucursal: ${sucursal}, Mes: ${mes}, Turno: ${turno}, Semana: ${semana}, Importe: ${importe}, Reserva: ${reserva}, Matricula: ${matricula}`;
+</ul>
+{% endblock %}

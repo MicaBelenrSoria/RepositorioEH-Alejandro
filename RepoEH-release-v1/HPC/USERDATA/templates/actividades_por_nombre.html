@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Seleccionar Sucursal</h1>
+<form method="get" action="">
+    <label for="sucursal">Seleccione una sucursal:</label>
+    <select name="sucursal" id="sucursal" onchange="this.form.submit()">
+        <option value="">-- Seleccione una sucursal --</option>
+        <option value="Arquitectura" {% if sucursal == "Arquitectura" %} selected {% endif %}>Arquitectura</option>
+        <option value="Pinocho" {% if sucursal == "Pinocho" %} selected {% endif %}>Pinocho</option>
+        <option value="UTC" {% if sucursal == "UTC" %} selected {% endif %}>UTC</option>
+    </select>
+</form>
+
+{% if actividades %}
+<form method="get" action="">
+    <input type="hidden" name="sucursal" value="{{ sucursal }}">
+    <label for="actividad">Seleccione una actividad:</label>
+    <select name="actividad" id="actividad" onchange="this.form.submit()">
+        <option value="">-- Seleccione una actividad --</option>
+        {% for actividad in actividades %}
+            <option value="{{ actividad }}" {% if actividad == actividad_seleccionada %} selected {% endif %}>{{ actividad }}</option>
+        {% endfor %}
+    </select>
+</form>
+{% endif %}
+
+{% if detalles_actividad %}
+<h2>Detalles de la Actividad: {{ actividad_seleccionada }}</h2>
+<div class="container">
+    <div class="legend-container">
+      <p>Veces por semana seleccionadas: <span id="seleccionadas">0</span></p>
+    </div>
+    <div id="{{ actividad_seleccionada }}">
+        {% for dia, horarios in detalles_actividad.items %}
+            <div class="column">
+                <h3>{{ dia }}</h3>
+                {% for horario in horarios %}
+                    <div class="horario" data-dia="{{ dia }}" data-desde="{{ horario.desde }}" data-hasta="{{ horario.hasta }}">
+                        <span>{{ horario.desde }} - {{ horario.hasta }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div id="datos-container">
+    <p>Sucursal: <span id="sucursal-nombre">{{ sucursal }}</span></p>
+    <p>Actividad: <span id="actividad-nombre">{{ actividad_seleccionada }}</span></p>
+    <p>Días y horarios seleccionados:</p>
+    <ul id="horarios-seleccionados"></ul>
+    <p>Cantidad de selecciones: <span id="datos">0</span></p>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const horarioElements = document.querySelectorAll('.horario');
+
+    horarioElements.forEach(element => {
+      element.addEventListener('click', function() {
+        const dia = this.getAttribute('data-dia');
+
+        if (this.classList.contains('seleccionado')) {
+          this.classList.remove('seleccionado');
+        } else {
+          document.querySelectorAll(`.horario.seleccionado[data-dia="${dia}"]`).forEach(el => {
+            el.classList.remove('seleccionado');
+          });
+          this.classList.add('seleccionado');
+        }
+
+        recuento();
+      });
+    });
+
+    function recuento() {
+      const seleccionados = document.querySelectorAll('.horario.seleccionado').length;
+      document.getElementById('seleccionadas').textContent = seleccionados;
+      document.getElementById('datos').textContent = seleccionados;
+
+      const horariosSeleccionados = document.querySelectorAll('.horario.seleccionado');
+      const listaHorarios = document.getElementById('horarios-seleccionados');
+      listaHorarios.innerHTML = '';
+
+      horariosSeleccionados.forEach(horario => {
+        const dia = horario.getAttribute('data-dia');
+        const desde = horario.getAttribute('data-desde');
+        const hasta = horario.getAttribute('data-hasta');
+        const li = document.createElement('li');
+        li.textContent = `${dia}: ${desde} - ${hasta}`;
+        listaHorarios.appendChild(li);
+      });
+    }
+  });
+</script>
+
+<style>
+  .horario {
+    background-color: rgb(207, 45, 240);
+    cursor: pointer;
+    margin-bottom: 10px;
+    padding: 5px;
+  }
+  .seleccionado {
+    background-color: greenyellow;
+  }
+  .column {
+    float: left;
+    width: 16.6%;
+    padding: 10px;
+    text-align: center;
+  }
+  #datos {
+    font-weight: bold;
+  }
+  #datos-container {
+    margin-top: 20px;
+  }
+  .container {
+    display: block;
+    width: 100%;
+  }
+  .legend-container {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+</style>
+{% endblock %}

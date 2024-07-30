@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Seleccione un Alumno</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ select_form.id.label }}:
+    {{ select_form.id }}
+    <button type="submit">Seleccionar</button>
+
+</form>
+
+
+{% endblock %}

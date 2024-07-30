@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Formulario de inscripción - Colonia invierno 2024</h1>
+    <hr>
+    <form method="post" id="actualizardatosalumno">
+        {% csrf_token %}
+    
+        <div class="row justify-content-center">
+            <div class="col-9 mb-3">
+<h4>Selecciona un alumno del siguiente listado para comenzar</h4>
+
+            <label for="alumno"></label>
+            <select class="form-select" name="alumno" id="alumno" onchange="this.form.submit()">
+                <option value="">-- Seleccione un alumno --</option>
+                {% for dato in datos %}
+                    <option value="{{ dato.0 }}" {% if dato.0 == seleccion_alumno %} selected {% endif %}>Alumno: {{ dato.2 }} {{ dato.3 }}</option>
+                {% endfor %}
+            </select><br><br>
+        </div>
+
+        <hr>
+
+        <h5>Datos básicos</h5>
+
+        <div class="col-md-6 col-sm-9">
+            <div class="input-group mb-3">
+                <input type="text" id="apellido" name="apellido" class="form-control" value="{{ form.apellido.value }}" required>
+                <span class="input-group-text">Apellido</span>
+            </div><br>
+
+
+            <div class="input-group mb-3">
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ form.nombre.value }}" required>
+                <span class="input-group-text">Nombre</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="dni" name="dni" class="form-control" value="{{ form.dni.value }}" readonly>
+                <span class="input-group-text">DNI</span>
+            </div><br>
+              
+
+              <div class="input-group mb-3">
+                <input type="date" id="fechanacimiento" name="fechanacimiento" class="form-control" value="{{ form.fechanacimiento.value|date:'Y-m-d' }}">
+                  <span class="input-group-text">Fecha de Nacimiento</span>
+              </div><br>
+
+
+         <div class="input-group mb-5">
+                <select class="form-select" id="sexo" name="sexo">
+                    <option value="M" {% if form.sexo.value == 'M' %} selected {% endif %}>Masculino</option>
+                    <option value="F" {% if form.sexo.value == 'F' %} selected {% endif %}>Femenino</option>
+             </select>
+                <label class="input-group-text" for="sexo">Sexo</label>
+              </div>
+
+            <div class="input-group mb-3">
+                  <input type="text" id="domicilio" name="domicilio" class="form-control" value="{{ form.domicilio.value }}">
+                  <span class="input-group-text">Domicilio</span>
+              </div><br>
+              
+
+              <div class="input-group mb-3">
+                  <input type="text" id="codigopostal" name="codigopostal" class="form-control" value="{{ form.codigopostal.value }}">
+                  <span class="input-group-text">Código Postal</span>
+              </div><br>
+              
+
+              <div class="input-group mb-3">
+                  <input type="text" id="provincia" name="provincia" class="form-control" value="{{ form.provincia.value }}">
+                  <span class="input-group-text">Provincia</span>
+              </div><br>
+              
+  
+              <div class="input-group mb-3">
+                  <input type="text" id="telefono" name="telefono" class="form-control" value="{{ form.telefono.value }}" required>
+                  <span class="input-group-text">Teléfono</span>
+              </div><br>
+              
+
+              <div class="input-group mb-3">
+                  <input type="text" id="celular" name="celular" class="form-control" value="{{ form.celular.value }}" required>
+                  <span class="input-group-text">Celular</span>
+              </div><br>
+              
+
+              <div class="input-group mb-3">
+                  <input type="email" id="email" name="email" autocomplete="off" class="form-control" value="{{ form.email.value }}">
+                  <span class="input-group-text">Email</span>
+              </div><br>
+              
+
+              <div class="input-group mb-5">
+                <select class="form-select" name="nivel_ed" id="nivel_ed" required>
+                    <option value="">-- Seleccione un nivel educativo --</option>
+                    {% for n in niveles %}
+                        <option value="{{ n.id }}" {% if n == nivel_ed %} selected {% endif %}>{{ n }}</option>
+                    {% endfor %}
+                </select>
+                <label class="input-group-text" for="nivel_ed">Nivel educativo</label>
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" id="colegio" name="colegio" class="form-control" value="{{ form.colegio.value }}">
+                <span class="input-group-text">Colegio</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="dificultadfisica" name="dificultadfisica" class="form-control" value="{{ form.dificultadfisica.value }}" required>
+                <span class="input-group-text">Tiene una dificultad física</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="tratamientopsicologico" name="tratamientopsicologico" class="form-control" value="{{ form.tratamientopsicologico.value }}" required>
+                <span class="input-group-text">Esta en tratamiento psicológico</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="esalergico" name="esalergico" class="form-control" value="{{ form.esalergico.value }}" required>
+                <span class="input-group-text">Es alérgico</span>
+            </div><br>
+            
+
+            <div class="input-group mb-5">
+                <select class="form-select" id="estemerosoaagua" name="estemerosoaagua">
+                    <option value="1" {% if form.estemerosoaagua.value == '1' %} selected {% endif %}>Si</option>
+                    <option value="0" {% if form.estemerosoaagua.value == '0' %} selected {% endif %}>No</option>
+             </select>
+                <label class="input-group-text" for="estemerosoaagua">Es temeroso al agua</label>
+              </div>          
+
+            <div class="input-group mb-5">
+                <select class="form-select" id="flotaenloprofundo" name="flotaenloprofundo">
+                    <option value="1" {% if form.flotaenloprofundo.value == '1' %} selected {% endif %}>Si</option>
+                    <option value="0" {% if form.flotaenloprofundo.value == '0' %} selected {% endif %}>No</option>
+             </select>
+                <label class="input-group-text" for="flotaenloprofundo">Flota en lo profundo</label>
+              </div>
+            
+            <div class="input-group mb-3">
+                <input type="text" id="observaciones" name="observaciones" class="form-control" value="{{ form.observaciones.value }}">
+                <span class="input-group-text">Observaciones</span>
+            </div><br>
+
+            <div class="input-group mb-3">
+                <input type="text" id="preferenciaamigos" name="preferenciaamigos" class="form-control" value="{{ form.preferenciaamigos.value }}">
+                <span class="input-group-text">Preferencia de amigos</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="padre" name="padre" class="form-control" value="{{ form.padre.value }}">
+                <span class="input-group-text">Padre : Nombre y Apellido</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="padrecelular" name="padrecelular" class="form-control" value="{{ form.padrecelular.value }}">
+                <span class="input-group-text">Padre : Celular</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="email" id="padreemail" name="padreemail" class="form-control" value="{{ form.padreemail.value }}">
+                <span class="input-group-text">Padre : Email</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="padredni" name="padredni" class="form-control" value="{{ form.padredni.value }}">
+                <span class="input-group-text">Padre : DNI</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="madre" name="madre" class="form-control" value="{{ form.madre.value }}">
+                <span class="input-group-text">Madre : Nombre y apellido</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="madrecelular" name="madrecelular" class="form-control" value="{{ form.madrecelular.value }}">
+                <span class="input-group-text">Madre : Celular</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="email" id="madreemail" name="madreemail" class="form-control" value="{{ form.madreemail.value }}">
+                <span class="input-group-text">Madre : Email</span>
+            </div><br>
+            
+
+            <div class="input-group mb-3">
+                <input type="text" id="madredni" name="madredni" class="form-control" value="{{ form.madredni.value }}">
+                <span class="input-group-text">Madre : DNI</span>
+            </div><br>
+           
+              
+        
+        </div>
+
+        <div class="card-body bg-white rounded w-75 p-4 my-2 mx-3">
+            Por medio de la presente, presto conformidad y manifiesto conocer y aceptar
+            las normas de convivencia y la forma de desarrollo de las actividades 
+            de la Escuela Hipocampo (Diopthaze S.R.L) y autorizo a mi hijo/a a realizar la 
+            actividad para la cual lo he inscripto. Asi mismo, autorizo al personal de la 
+            escuela hipocampo, a tomar todas las medidas que a su criterio juzguen necesarias 
+            para preservar la integridad y salud de mi hijoia, en caso de urgencias o fuerza
+             mayor. Dejo constancia que mi hijo/a se encuentra autorizado y en perfecto estado
+              de salud para desarrollar las actividades en que lo estoy inscribiendo, 
+              acompañando el certificado médico de aptitud física. Me comprometo a comunicar
+               a la escuela hipocampo, cualquier cambio en su condición, siendo
+                dicha circunstancia mi absoluta responsabilidad, eximiéndolos de cualquier 
+                daño o perjuicio que mi hijo/a, pudiere sufrir. 
+
+        </div>
+
+        <button class="btn btn-outline-light mt-2 mb-5 mx-1 w-25" id="consentimiento" type="submit"><b>Aceptar</b></button>
+    </div>  
+    </form> 
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    var nivelEd = document.getElementById("nivel_ed");
+
+
+    function checkSelection() {
+        if (nivelEd.value === "") {
+            nivelEd.style.color = "red";
+        } else {
+            nivelEd.style.color = "";
+        }
+    }
+
+    // Verifica la selección al cargar la página
+    checkSelection();
+
+    // Verifica la selección cuando cambia la selección
+    nivelEd.addEventListener("change", checkSelection);
+});
+
+</script>
+
+<script>
+    document.getElementById('actualizardatosalumno').addEventListener('submit', function(event) {
+        // Prevenir el envío del formulario para mostrar los datos en la consola
+        event.preventDefault();
+        console.log("dentro del script, viendo si se manda algo");
+        // Recopilar los datos del formulario
+        const formData = new FormData(this);
+        const formObject = {};
+
+        // Convertir los datos a un objeto
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        // Mostrar los datos en la consola
+        console.log(formObject);
+
+        // Si quieres enviar el formulario después de mostrar los datos, descomenta la siguiente línea
+        this.submit();
+    });
+</script>
+
+    {% endblock %}
+
+
+

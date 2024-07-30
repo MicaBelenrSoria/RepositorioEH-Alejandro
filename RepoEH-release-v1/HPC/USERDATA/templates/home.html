@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+  <main class="px-3">
+    <h1>Escuela Hipocampo</h1>
+
+    {% if request.user.is_authenticated %}
+
+      <p class="lead">{% if request.user.is_authenticated %}Bienvenido {{ user.username | upper }}, {% endif %}. Esta ud logueado</p>
+
+    {% else %}
+
+      <p class="lead">Este es un mensaje si ud no esta logueado</p>
+
+    {% endif %}
+
+    
+  </main>
+{% endblock %}
