@@ -54,11 +54,11 @@ class UploadCertificateForm(forms.Form):
     def clean_medical_certificate(self):
         medical_certificate = self.cleaned_data.get('medical_certificate')
         if medical_certificate and medical_certificate.size > 1 * 1024 * 1024:
-            raise forms.ValidationError("El archivo no puede superar 1 MB.")
+            raise forms.ValidationError("La imagen no puede superar 1 MB.")
         return medical_certificate
 
     def clean_health_insurance_card(self):
         health_insurance_card = self.cleaned_data.get('health_insurance_card')
         if health_insurance_card and health_insurance_card.size > 1 * 1024 * 1024:
-            raise forms.ValidationError("El archivo no puede superar 1 MB.")
+            raise forms.ValidationError("La imagen no puede superar 1 MB.")
         return health_insurance_card
