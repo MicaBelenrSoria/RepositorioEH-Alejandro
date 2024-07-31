@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': 'Hipocampo',
         'USER': '',
         'PASSWORD': '',
-        'HOST': 'DESKTOP-MTJLAID\SQLEXPRESS',
+        'HOST': r'DESKTOP-MTJLAID\SQLEXPRESS',
         'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
@@ -185,3 +185,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #varible de redireccion
 LOGIN_REDIRECT_URL = reverse_lazy('home')
+
+# MODIFICACIONES PARA NO UTILIZAR MODELOS
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

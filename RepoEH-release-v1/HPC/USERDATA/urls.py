@@ -1,5 +1,8 @@
 from django.urls import path
 from .views import home, elegir_alumno, alumno_modificacion, actividades_por_nombre, exit, datos_alumno, datos_alumno1,register,seleccionar_alumno,sucess,upload_image,inscripcion_colonia,mercadopago_checkout,mercadopago_webhook
+from django.conf import settings
+from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
     path('', home, name='home'),
@@ -16,4 +19,6 @@ urlpatterns = [
     path('logout/', exit, name='exit'),
     path('mercadopago_checkout/', mercadopago_checkout, name='mercadopago_checkout'),
     path('mercadopago_webhook/', mercadopago_webhook, name='mercadopago_webhook'),
-]
+    path('upload-certificate/', views.upload_certificate, name='upload_certificate'),
+    path('upload-success/', views.upload_success, name='upload_success'),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

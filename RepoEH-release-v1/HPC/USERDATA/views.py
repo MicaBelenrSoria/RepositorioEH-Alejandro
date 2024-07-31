@@ -15,6 +15,9 @@ import mercadopago
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import uuid
+from .forms import UploadCertificateForm
+import os
+from django.conf import settings
 
 # Create your views here.
 def home(request):
@@ -927,3 +930,47 @@ def mercadopago_webhook(request):
 
     else:
         return HttpResponse('El metodo no es aceptado, solo se permite metodos POST', status=405)
+
+
+@login_required
+def upload_certificate(request):
+    if request.method == 'POST':
+        form = UploadCertificateForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = request.user
+            
+            # Obtener el DNI del usuario (usando el username del usuario)
+            dni = user.username
+            date_str = datetime.now().strftime('%d%m%Y_%H%M%S')
+            
+            # Función para renombrar y guardar los archivos
+            def rename_and_save_file(file, prefix):
+                ext = os.path.splitext(file.name)[1].lower()
+                if ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                    new_name = f"{dni}_{date_str}_{prefix}{ext}"
+                    directory = os.path.join(settings.MEDIA_ROOT, 'certificates')
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    file_path = os.path.join(directory, new_name)
+                    with open(file_path, 'wb+') as destination:
+                        for chunk in file.chunks():
+                            destination.write(chunk)
+                    return new_name
+                return None
+            
+            # Renombra y almacena el Apto médico
+            if 'medical_certificate' in request.FILES:
+                medical_certificate = rename_and_save_file(request.FILES['medical_certificate'], 'AM')
+            
+            # Renombra y almacena la Credencial de la Obra Social
+            if 'health_insurance_card' in request.FILES:
+                health_insurance_card = rename_and_save_file(request.FILES['health_insurance_card'], 'OS')
+            
+            return redirect('upload_success')
+    else:
+        form = UploadCertificateForm()
+    
+    return render(request, 'upload_certificate.html', {'form': form})
+
+def upload_success(request):
+    return render(request, 'upload_success.html')
