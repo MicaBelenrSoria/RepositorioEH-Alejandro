@@ -984,7 +984,6 @@ def upload_success(request):
 @staff_member_required
 def download_media(request):
     media_root = settings.MEDIA_ROOT
-    # Crear un archivo ZIP en memoria
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for root, dirs, files in os.walk(media_root):
@@ -999,15 +998,19 @@ def download_media(request):
 @staff_member_required
 def media_options(request):
     media_root = settings.MEDIA_ROOT
+    media_url = settings.MEDIA_URL
     images_by_alumno = {}
-    
+
     for root, dirs, files in os.walk(media_root):
         for file in files:
             if file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                alumno_id = file.split('_')[0]  # Asumimos que el ID del alumno es la primera parte del nombre del archivo
+                alumno_id = file.split('_')[0] 
                 if alumno_id not in images_by_alumno:
                     images_by_alumno[alumno_id] = []
-                images_by_alumno[alumno_id].append(file)
+                images_by_alumno[alumno_id].append({
+                    'name': file,
+                    'url': os.path.join(media_url, os.path.relpath(os.path.join(root, file), media_root))
+                })
     
     return render(request, 'media_options.html', {'images_by_alumno': images_by_alumno})
 
@@ -1025,26 +1028,25 @@ def delete_media(request):
     else:
         return redirect('confirm_delete_media')
 
+
+
 @staff_member_required
 def confirm_delete_media(request):
     return render(request, 'confirm_delete.html')
 
+
+
 @staff_member_required
 def accept_image(request, file_name):
-    # Aquí puedes agregar lógica para marcar la imagen como aceptada
     return HttpResponse(f"Imagen {file_name} aceptada.")
 
 @staff_member_required
-def reject_image(request, file_name):
-    motivo = ""
-    if "AM" in file_name:
-        motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
-    elif "OS" in file_name:
-        motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela"
-    notificacion_rechazo(file_name, motivo)
-    return HttpResponse(f"Imagen {file_name} rechazada.")
+def reject_image(request, image_name):
+    # Lógica para rechazar la imagen
+    # Aquí podrías eliminar la imagen, moverla a una carpeta de "rechazadas", etc.
+    motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
+    return JsonResponse({'status': 'error', 'message': 'Imagen rechazada'})
 
 def notificacion_rechazo(file_name, motivo):
-    # Aquí agregarías la lógica para enviar la notificación
     print(f"Notificación de rechazo para {file_name}: {motivo}")
 

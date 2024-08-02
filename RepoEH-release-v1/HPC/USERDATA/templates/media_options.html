@@ -6,19 +6,19 @@
         <div class="text-center">
             <a href="{% url 'download_media' %}" class="btn btn-outline-primary mb-3">Descargar Archivos Media</a>
             <br>
-            <a href="{% url 'delete_media' %}" class="btn btn-outline-danger mb-3">Eliminar Todos los Archivos Media</a>
+            <a href="{% url 'confirm_delete_media' %}" class="btn btn-outline-danger mb-3">Eliminar Todos los Archivos Media</a>
             <br>
             <h2>Listado de Imágenes por Alumno</h2>
-            <ul>
+            <ul class="image-list" style="list-style-type: none; padding: 0;">
                 {% for alumno, images in images_by_alumno.items %}
                     <li><strong>Alumno {{ alumno }}</strong>
-                        <ul>
+                        <ul class="image-list" style="list-style-type: none; padding: 0;">
                             {% for image in images %}
-                                <li>
-                                    {{ image }}
-                                    <br>
-                                    <a href="{% url 'accept_image' image %}" class="btn btn-success btn-sm">Aceptar</a>
-                                    <a href="{% url 'reject_image' image %}" class="btn btn-danger btn-sm">Rechazar</a>
+                                <li style="margin-bottom: 15px;">
+                                    <img src="{{ image.url }}" alt="{{ image.name }}" style="max-width: 200px; max-height: 200px;">
+                                    {{ image.name }}
+                                    <a href="{% url 'accept_image' image.name %}" class="btn btn-success btn-sm" onclick="showToast('success', 'Imagen aceptada correctamente'); return false;">Aceptar</a>
+                                    <a href="{% url 'reject_image' image.name %}" class="btn btn-danger btn-sm" onclick="showToast('error', 'Imagen rechazada'); return false;">Rechazar</a>
                                 </li>
                             {% endfor %}
                         </ul>

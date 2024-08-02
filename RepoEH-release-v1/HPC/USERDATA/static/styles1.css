@@ -43,3 +43,13 @@ a.nav-link{
 .nav-fondo{
     background-color: #6e4e8b;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------------------- */
+
+.image-list {
+    list-style-type: none; /* Elimina los puntos de lista */
+}
+
+.image-list li {
+    margin-bottom: 15px; /* Añade margen entre los elementos de la lista */
+}
