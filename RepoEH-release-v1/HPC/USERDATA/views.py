@@ -18,10 +18,15 @@ import uuid
 from .forms import UploadCertificateForm
 import os
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+import zipfile
+from django.core.mail import send_mail
+import io
 
 # Create your views here.
 def home(request):
     return render(request, 'home.html')
+
 
 def sucess(request):
     return render(request, 'sucess.html')
@@ -974,3 +979,72 @@ def upload_certificate(request):
 
 def upload_success(request):
     return render(request, 'upload_success.html')
+
+
+@staff_member_required
+def download_media(request):
+    media_root = settings.MEDIA_ROOT
+    # Crear un archivo ZIP en memoria
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for root, dirs, files in os.walk(media_root):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zip_file.write(file_path, os.path.relpath(file_path, media_root))
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=media_files.zip'
+    return response
+
+@staff_member_required
+def media_options(request):
+    media_root = settings.MEDIA_ROOT
+    images_by_alumno = {}
+    
+    for root, dirs, files in os.walk(media_root):
+        for file in files:
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                alumno_id = file.split('_')[0]  # Asumimos que el ID del alumno es la primera parte del nombre del archivo
+                if alumno_id not in images_by_alumno:
+                    images_by_alumno[alumno_id] = []
+                images_by_alumno[alumno_id].append(file)
+    
+    return render(request, 'media_options.html', {'images_by_alumno': images_by_alumno})
+
+
+
+@staff_member_required
+def delete_media(request):
+    if request.method == 'POST':
+        media_root = settings.MEDIA_ROOT
+        for root, dirs, files in os.walk(media_root):
+            for file in files:
+                file_path = os.path.join(root, file)
+                os.remove(file_path)
+        return HttpResponse("Todos los archivos multimedia se han eliminado correctamente.")
+    else:
+        return redirect('confirm_delete_media')
+
+@staff_member_required
+def confirm_delete_media(request):
+    return render(request, 'confirm_delete.html')
+
+@staff_member_required
+def accept_image(request, file_name):
+    # Aquí puedes agregar lógica para marcar la imagen como aceptada
+    return HttpResponse(f"Imagen {file_name} aceptada.")
+
+@staff_member_required
+def reject_image(request, file_name):
+    motivo = ""
+    if "AM" in file_name:
+        motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
+    elif "OS" in file_name:
+        motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela"
+    notificacion_rechazo(file_name, motivo)
+    return HttpResponse(f"Imagen {file_name} rechazada.")
+
+def notificacion_rechazo(file_name, motivo):
+    # Aquí agregarías la lógica para enviar la notificación
+    print(f"Notificación de rechazo para {file_name}: {motivo}")
+

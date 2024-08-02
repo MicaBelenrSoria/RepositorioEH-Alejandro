@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if user.is_authenticated and user.is_staff %}
+        <h1 class="text-center">Gestión de Archivos Media</h1>
+        <div class="text-center">
+            <a href="{% url 'download_media' %}" class="btn btn-outline-primary mb-3">Descargar Archivos Media</a>
+            <br>
+            <a href="{% url 'delete_media' %}" class="btn btn-outline-danger mb-3">Eliminar Todos los Archivos Media</a>
+            <br>
+            <h2>Listado de Imágenes por Alumno</h2>
+            <ul>
+                {% for alumno, images in images_by_alumno.items %}
+                    <li><strong>Alumno {{ alumno }}</strong>
+                        <ul>
+                            {% for image in images %}
+                                <li>
+                                    {{ image }}
+                                    <br>
+                                    <a href="{% url 'accept_image' image %}" class="btn btn-success btn-sm">Aceptar</a>
+                                    <a href="{% url 'reject_image' image %}" class="btn btn-danger btn-sm">Rechazar</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p class="text-center">No tienes permisos para gestionar los archivos media.</p>
+    {% endif %}
+{% endblock %}

@@ -189,3 +189,8 @@ LOGIN_REDIRECT_URL = reverse_lazy('home')
 # MODIFICACIONES PARA NO UTILIZAR MODELOS
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+#login
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'

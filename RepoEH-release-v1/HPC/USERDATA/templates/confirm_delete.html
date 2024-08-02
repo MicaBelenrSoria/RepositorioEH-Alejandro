@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Confirmar eliminación de todos los archivos multimedia</h2>
+    <form method="post" action="{% url 'delete_media' %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-light mt-2 mb-5 w-100 elegir_alumno" id="upload_certificate_button" type="submit">Confirmar eliminación</button>
+    </form>
+{% endblock %}
