@@ -1042,10 +1042,17 @@ def accept_image(request, file_name):
 
 @staff_member_required
 def reject_image(request, image_name):
-    # Lógica para rechazar la imagen
-    # Aquí podrías eliminar la imagen, moverla a una carpeta de "rechazadas", etc.
-    motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
-    return JsonResponse({'status': 'error', 'message': 'Imagen rechazada'})
+
+    if "AM" in image_name:
+        motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
+    elif "OS" in image_name:
+        motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela"
+    else:
+        motivo = "Imagen rechazada por razones desconocidas. Por favor contactarse con la escuela"
+
+    notificacion_rechazo(image_name, motivo)
+    
+    return JsonResponse({'status': 'error', 'message': motivo})
 
 def notificacion_rechazo(file_name, motivo):
     print(f"Notificación de rechazo para {file_name}: {motivo}")

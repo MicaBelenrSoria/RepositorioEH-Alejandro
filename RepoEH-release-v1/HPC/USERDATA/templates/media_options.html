@@ -15,7 +15,8 @@
                         <ul class="image-list" style="list-style-type: none; padding: 0;">
                             {% for image in images %}
                                 <li style="margin-bottom: 15px;">
-                                    <img src="{{ image.url }}" alt="{{ image.name }}" style="max-width: 200px; max-height: 200px;">
+                                    <!-- <img src="{{ image.url }}" alt="{{ image.name }}" style="max-width: 200px; max-height: 200px;"> -->
+                                    <img src="{{ image.url }}" class="img-thumbnail" alt="{{ image.name }}" style="width: 200px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal{{ image.name }}">
                                     {{ image.name }}
                                     <a href="{% url 'accept_image' image.name %}" class="btn btn-success btn-sm" onclick="showToast('success', 'Imagen aceptada correctamente'); return false;">Aceptar</a>
                                     <a href="{% url 'reject_image' image.name %}" class="btn btn-danger btn-sm" onclick="showToast('error', 'Imagen rechazada'); return false;">Rechazar</a>
@@ -26,6 +27,24 @@
                 {% endfor %}
             </ul>
         </div>
+        {% for alumno, images in images_by_alumno.items %}
+            {% for image in images %}
+        <!-- Modal -->
+        <div class="modal fade" id="imageModal{{ image.name }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img src="{{ image.url }}" class="img-fluid" alt="{{ image.name }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+            {% endfor %}
+        {% endfor %}
     {% else %}
         <p class="text-center">No tienes permisos para gestionar los archivos media.</p>
     {% endif %}
