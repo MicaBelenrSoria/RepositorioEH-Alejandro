@@ -1026,32 +1026,41 @@ def accept_image(request, image_name):
     original_file_path = os.path.join(media_root, 'certificates', image_name)
 
     if os.path.exists(original_file_path):
+        accepted_folder = os.path.join(media_root, 'certificates', 'documentacion_aceptada')
+        if not os.path.exists(accepted_folder):
+            os.makedirs(accepted_folder)
+        
+        # Renombrar y mover la imagen a la carpeta 'documentacion_aceptada'
         new_file_name = image_name.replace('.', '_ok.')
-        new_file_path = os.path.join(media_root, 'certificates', new_file_name)
+        new_file_path = os.path.join(accepted_folder, new_file_name)
         os.rename(original_file_path, new_file_path)
-
-        # Mensaje de éxito simplificado
-        messages.success(request, "Imagen aceptada.")
+        
+        messages.success(request, f"Imagen aceptada y movida a 'documentacion_aceptada' como {new_file_name}.")
     else:
-        messages.error(request, f"El archivo {image_name} no se encuentra en el directorio de medios.")
+        messages.error(request, f"El archivo no se encuentra en el directorio de medios.")
 
     return redirect('listar_imagenes')
 
 
 @staff_member_required
 def reject_image(request, image_name):
-    if "AM" in image_name:
-        motivo = "Fue rechazado el apto médico provisto para el alumno. Por favor contactarse con la escuela"
-    elif "OS" in image_name:
-        motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela"
+    media_root = settings.MEDIA_ROOT
+    original_file_path = os.path.join(media_root, 'certificates', image_name)
+
+    if os.path.exists(original_file_path):
+        rejected_folder = os.path.join(media_root, 'certificates', 'documentacion_rechazada')
+        if not os.path.exists(rejected_folder):
+            os.makedirs(rejected_folder)
+        
+        # Mover la imagen a la carpeta 'documentacion_rechazada' sin cambiar el nombre
+        new_file_path = os.path.join(rejected_folder, image_name)
+        os.rename(original_file_path, new_file_path)
+        
+        messages.error(request, f"Imagen rechazada y movida a 'documentacion_rechazada'.")
     else:
-        motivo = "Imagen rechazada por razones desconocidas. Por favor contactarse con la escuela"
+        messages.error(request, f"El archivo no se encuentra en el directorio de medios.")
 
-    notificacion_rechazo(image_name, motivo)
-    return JsonResponse({'status': 'error', 'message': motivo})
-
-def notificacion_rechazo(image_name, motivo):
-    print(f"Notificación de rechazo para {image_name}: {motivo}")
+    return redirect('listar_imagenes')
 
 @staff_member_required
 def index(request):
@@ -1080,9 +1089,11 @@ def listar_imagenes(request):
     media_url = settings.MEDIA_URL
     images_by_alumno = {}
 
-    for root, dirs, files in os.walk(media_root):
+    # Caminamos por el directorio 'certificates'
+    for root, dirs, files in os.walk(os.path.join(media_root, 'certificates')):
         for file in files:
-            if not file.endswith('_ok.jpg') and not file.endswith('_ok.png') and not file.endswith('_ok.jpeg'):
+            # Excluir imágenes en las carpetas 'documentacion_aceptada' y 'documentacion_rechazada'
+            if 'documentacion_aceptada' not in root and 'documentacion_rechazada' not in root:
                 partes_nombre = file.split('_')
                 if len(partes_nombre) > 1:
                     alumno_id = partes_nombre[0]
