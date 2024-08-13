@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required #decorador para el login required
 from django.contrib.auth import logout, authenticate, login
 from django.db import connections,transaction
@@ -22,6 +22,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 import zipfile
 from django.core.mail import send_mail
 import io
+from django.core.files.storage import FileSystemStorage
+import shutil
+from .models import Documentacion
 
 # Create your views here.
 def home(request):
@@ -943,12 +946,9 @@ def upload_certificate(request):
         form = UploadCertificateForm(request.POST, request.FILES)
         if form.is_valid():
             user = request.user
-            
-            # Obtener el DNI del usuario (usando el username del usuario)
             dni = user.username
             date_str = datetime.now().strftime('%d%m%Y_%H%M%S')
             
-            # Función para renombrar y guardar los archivos
             def rename_and_save_file(file, prefix):
                 ext = os.path.splitext(file.name)[1].lower()
                 if ext in ['.jpg', '.jpeg', '.png', '.webp']:
@@ -963,11 +963,9 @@ def upload_certificate(request):
                     return new_name
                 return None
             
-            # Renombra y almacena el Apto médico
             if 'medical_certificate' in request.FILES:
                 medical_certificate = rename_and_save_file(request.FILES['medical_certificate'], 'AM')
             
-            # Renombra y almacena la Credencial de la Obra Social
             if 'health_insurance_card' in request.FILES:
                 health_insurance_card = rename_and_save_file(request.FILES['health_insurance_card'], 'OS')
             
@@ -980,80 +978,119 @@ def upload_certificate(request):
 def upload_success(request):
     return render(request, 'upload_success.html')
 
-
 @staff_member_required
 def download_media(request):
-    media_root = settings.MEDIA_ROOT
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for root, dirs, files in os.walk(media_root):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zip_file.write(file_path, os.path.relpath(file_path, media_root))
-    buffer.seek(0)
-    response = HttpResponse(buffer, content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename=media_files.zip'
+    media_folder = settings.MEDIA_ROOT
+    zip_filename = os.path.join(settings.BASE_DIR, 'media.zip')
+
+    with zipfile.ZipFile(zip_filename, 'w') as zip_file:
+        for foldername, subfolders, filenames in os.walk(media_folder):
+            for filename in filenames:
+                file_path = os.path.join(foldername, filename)
+                zip_file.write(file_path, os.path.relpath(file_path, media_folder))
+
+    with open(zip_filename, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename=media.zip'
+        return response
+
     return response
-
-@staff_member_required
-def media_options(request):
-    media_root = settings.MEDIA_ROOT
-    media_url = settings.MEDIA_URL
-    images_by_alumno = {}
-
-    for root, dirs, files in os.walk(media_root):
-        for file in files:
-            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                alumno_id = file.split('_')[0] 
-                if alumno_id not in images_by_alumno:
-                    images_by_alumno[alumno_id] = []
-                images_by_alumno[alumno_id].append({
-                    'name': file,
-                    'url': os.path.join(media_url, os.path.relpath(os.path.join(root, file), media_root))
-                })
-    
-    return render(request, 'media_options.html', {'images_by_alumno': images_by_alumno})
-
-
 
 @staff_member_required
 def delete_media(request):
     if request.method == 'POST':
+        # Redirigir a la vista de confirmación
+        return redirect('confirm_delete_media')
+    else:
+        # Mostrar una página de información si no es POST
+        return HttpResponse("Método no permitido. Usa POST para confirmar la eliminación.")
+    
+@staff_member_required
+def confirm_delete_media(request):
+    if request.method == 'POST':
+        # Eliminar los archivos multimedia
         media_root = settings.MEDIA_ROOT
         for root, dirs, files in os.walk(media_root):
             for file in files:
                 file_path = os.path.join(root, file)
                 os.remove(file_path)
-        return HttpResponse("Todos los archivos multimedia se han eliminado correctamente.")
+        # Redirigir al inicio después de eliminar los archivos
+        return redirect('admin:index')  # Ajusta esta URL si es necesario
     else:
-        return redirect('confirm_delete_media')
-
-
-
-@staff_member_required
-def confirm_delete_media(request):
-    return render(request, 'confirm_delete.html')
-
-
+        # Mostrar la página de confirmación
+        return render(request, 'confirm_delete_media.html')
 
 @staff_member_required
-def accept_image(request, file_name):
-    return HttpResponse(f"Imagen {file_name} aceptada.")
+def accept_image(request, image_name):
+    media_root = settings.MEDIA_ROOT
+    original_file_path = os.path.join(media_root, 'certificates', image_name)
+
+    if os.path.exists(original_file_path):
+        new_file_name = image_name.replace('.', '_ok.')
+        new_file_path = os.path.join(media_root, 'certificates', new_file_name)
+        os.rename(original_file_path, new_file_path)
+
+        # Mensaje de éxito simplificado
+        messages.success(request, "Imagen aceptada.")
+    else:
+        messages.error(request, f"El archivo {image_name} no se encuentra en el directorio de medios.")
+
+    return redirect('listar_imagenes')
+
 
 @staff_member_required
 def reject_image(request, image_name):
-
     if "AM" in image_name:
-        motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela"
+        motivo = "Fue rechazado el apto médico provisto para el alumno. Por favor contactarse con la escuela"
     elif "OS" in image_name:
         motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela"
     else:
         motivo = "Imagen rechazada por razones desconocidas. Por favor contactarse con la escuela"
 
     notificacion_rechazo(image_name, motivo)
-    
     return JsonResponse({'status': 'error', 'message': motivo})
 
-def notificacion_rechazo(file_name, motivo):
-    print(f"Notificación de rechazo para {file_name}: {motivo}")
+def notificacion_rechazo(image_name, motivo):
+    print(f"Notificación de rechazo para {image_name}: {motivo}")
 
+@staff_member_required
+def index(request):
+    media_root = settings.MEDIA_ROOT
+    media_url = settings.MEDIA_URL
+    images_by_alumno = {}
+
+    for root, dirs, files in os.walk(media_root):
+        for file in files:
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')) and not file.endswith('-ok.jpg') and not file.endswith('-ok.png') and not file.endswith('-ok.jpeg'):
+                partes_nombre = file.split('_')
+                if len(partes_nombre) > 1:
+                    alumno_id = partes_nombre[0]
+                    if alumno_id not in images_by_alumno:
+                        images_by_alumno[alumno_id] = []
+                    images_by_alumno[alumno_id].append({
+                        'name': file,
+                        'url': os.path.join(media_url, os.path.relpath(os.path.join(root, file), media_root))
+                    })
+
+    return render(request, 'admin/index.html', {'images_by_alumno': images_by_alumno})
+
+@staff_member_required
+def listar_imagenes(request):
+    media_root = settings.MEDIA_ROOT
+    media_url = settings.MEDIA_URL
+    images_by_alumno = {}
+
+    for root, dirs, files in os.walk(media_root):
+        for file in files:
+            if not file.endswith('_ok.jpg') and not file.endswith('_ok.png') and not file.endswith('_ok.jpeg'):
+                partes_nombre = file.split('_')
+                if len(partes_nombre) > 1:
+                    alumno_id = partes_nombre[0]
+                    if alumno_id not in images_by_alumno:
+                        images_by_alumno[alumno_id] = []
+                    images_by_alumno[alumno_id].append({
+                        'name': file,
+                        'url': os.path.join(media_url, os.path.relpath(os.path.join(root, file), media_root))
+                    })
+
+    return render(request, 'listar_imagenes.html', {'images_by_alumno': images_by_alumno})

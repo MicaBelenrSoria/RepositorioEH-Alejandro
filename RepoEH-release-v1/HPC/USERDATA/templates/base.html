@@ -34,7 +34,6 @@
             <a class="nav-link" href={% url 'inscripcion_colonia' %}>Inscripción Colonia</a>
             <a class="nav-link" href={% url 'elegir_alumno' %}>Mis datos</a>
             <a class="nav-link" href={% url 'upload_certificate' %}>Mis Certificados</a>
-            <a class="nav-link" href={% url 'media_options' %}>Gestion de Archivos</a>
             {% if request.user.is_authenticated %}
             <a class="nav-link" href={% url 'exit' %}>Salir</a>
             {% else %}

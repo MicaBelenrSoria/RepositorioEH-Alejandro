@@ -1,5 +1,6 @@
+from django.contrib import admin
 from django.urls import path
-from .views import home, elegir_alumno, alumno_modificacion, actividades_por_nombre, exit, datos_alumno, datos_alumno1,register,seleccionar_alumno,sucess,upload_image,inscripcion_colonia,mercadopago_checkout,mercadopago_webhook, accept_image, reject_image
+from .views import home, elegir_alumno, alumno_modificacion, actividades_por_nombre, exit, datos_alumno, datos_alumno1,register,seleccionar_alumno,sucess,upload_image,inscripcion_colonia,mercadopago_checkout,mercadopago_webhook, download_media, delete_media, accept_image, index, reject_image, confirm_delete_media, listar_imagenes
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
@@ -21,10 +22,11 @@ urlpatterns = [
     path('mercadopago_webhook/', mercadopago_webhook, name='mercadopago_webhook'),
     path('upload-certificate/', views.upload_certificate, name='upload_certificate'),
     path('upload-success/', views.upload_success, name='upload_success'),
+    path('admin/download-media/', views.download_media, name='admin_download_media'),
+    path('admin/delete_media/', views.delete_media, name='admin_delete_media'),
     path('admin/confirm-delete-media/', views.confirm_delete_media, name='confirm_delete_media'),
-    path('delete_media/', views.delete_media, name='delete_media'),
-    path('download_media/', views.download_media, name='download_media'),
-    path('media_options/', views.media_options, name='media_options'),
-    path('accept_image/<str:file_name>/', accept_image, name='accept_image'),
-    path('reject_image/<str:file_name>/', reject_image, name='reject_image'),
+    path('accept-image/<str:image_name>/', views.accept_image, name='accept_image'),
+    path('reject-image/<str:image_name>/', views.reject_image, name='reject_image'),
+    path('admin/', admin.site.urls, name='custom_admin'),
+    path('listar-imagenes/', views.listar_imagenes, name='listar_imagenes'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
