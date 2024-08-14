@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import home, elegir_alumno, alumno_modificacion, actividades_por_nombre, exit, datos_alumno, datos_alumno1,register,seleccionar_alumno,sucess,upload_image,inscripcion_colonia,mercadopago_checkout,mercadopago_webhook, download_media, delete_media, accept_image, index, reject_image, confirm_delete_media, listar_imagenes
+from .views import home, elegir_alumno, alumno_modificacion, actividades_por_nombre, exit, datos_alumno, datos_alumno1,register,seleccionar_alumno,sucess,upload_image,inscripcion_colonia,mercadopago_checkout,mercadopago_webhook, download_media, delete_media, accept_image, index, reject_image, confirm_delete_media, listar_imagenes, consultar_archivos, descargar_contenido_media
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
@@ -29,4 +29,6 @@ urlpatterns = [
     path('reject-image/<str:image_name>/', views.reject_image, name='reject_image'),
     path('admin/', admin.site.urls, name='custom_admin'),
     path('listar-imagenes/', views.listar_imagenes, name='listar_imagenes'),
+    path('consultar-archivos/', consultar_archivos, name='consultar_archivos'),
+    path('descargar-contenido-media/', descargar_contenido_media, name='descargar_contenido_media'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

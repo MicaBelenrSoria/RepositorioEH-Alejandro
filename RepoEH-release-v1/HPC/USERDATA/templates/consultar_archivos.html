@@ -1,0 +1,97 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Documentación de Alumnos</h1>
+
+<div>
+    <button id="btn-accepted" onclick="showAccepted()" class="custom-button">Documentación Aceptada</button>
+    <button id="btn-rejected" onclick="showRejected()" class="custom-button">Documentación Rechazada</button>
+    <button id="btn-pending" onclick="showPending()" class="custom-button">Pendientes de Validación</button>
+</div>
+
+<div id="accepted-section" style="display:none;">
+    <h2>Documentación Aceptada</h2>
+    {% for alumno_id, images in accepted_images.items %}
+        <h3>Alumno: {{ alumno_id }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in images %}
+                <div style="margin: 10px;">
+                    <img src="{{ image.url }}" alt="Imagen aceptada" style="max-width: 200px; max-height: 200px;">
+                    <p>{{ image.name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div id="rejected-section" style="display:none;">
+    <h2>Documentación Rechazada</h2>
+    {% for alumno_id, images in rejected_images.items %}
+        <h3>Alumno: {{ alumno_id }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in images %}
+                <div style="margin: 10px;">
+                    <img src="{{ image.url }}" alt="Imagen rechazada" style="max-width: 200px; max-height: 200px;">
+                    <p>{{ image.name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div id="pending-section" style="display:none;">
+    <h2>Pendientes de Validación</h2>
+    {% for alumno_id, images in pending_images.items %}
+        <h3>Alumno: {{ alumno_id }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in images %}
+                <div style="margin: 10px;">
+                    <img src="{{ image.url }}" alt="Imagen pendiente" style="max-width: 200px; max-height: 200px;">
+                    <p>{{ image.name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    function showAccepted() {
+        document.getElementById('accepted-section').style.display = 'block';
+        document.getElementById('rejected-section').style.display = 'none';
+        document.getElementById('pending-section').style.display = 'none';
+    }
+
+    function showRejected() {
+        document.getElementById('accepted-section').style.display = 'none';
+        document.getElementById('rejected-section').style.display = 'block';
+        document.getElementById('pending-section').style.display = 'none';
+    }
+
+    function showPending() {
+        document.getElementById('accepted-section').style.display = 'none';
+        document.getElementById('rejected-section').style.display = 'none';
+        document.getElementById('pending-section').style.display = 'block';
+    }
+</script>
+
+<style>
+    .custom-button {
+        background-color: #2f657a; 
+        color: white; 
+        padding: 10px 20px; 
+        border: none; 
+        border-radius: 5px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 16px; 
+        margin: 5px 2px; 
+        cursor: pointer; 
+    }
+
+    .custom-button:hover {
+        background-color: #181818; 
+        color: white; 
+    }
+</style>
+{% endblock %}

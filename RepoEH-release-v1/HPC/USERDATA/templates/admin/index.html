@@ -1,29 +1,48 @@
 {% extends "admin/base_site.html" %}
+
 {% block content %}
 
 <div>
-    <form method="post" action="{% url 'admin_download_media' %}">
-        {% csrf_token %}
-        <button type="submit">Descargar carpeta MEDIA</button>
-    </form>
+    <a href="{% url 'admin_download_media' %}" class="custom-button">Descargar carpeta MEDIA</a>
 </div>
 
 <br>
 
 <div>
-    <form method="post" action="{% url 'admin_delete_media' %}">
-        {% csrf_token %}
-        <button type="submit">Eliminar contenido de MEDIA</button>
-    </form>
+    <a href="{% url 'admin_delete_media' %}" class="custom-button">Eliminar contenido de MEDIA</a>
 </div>
 
 <br>
 
 <div>
-    <a href="{% url 'listar_imagenes' %}"><button>Listado de Imágenes</button></a>
+    <a href="{% url 'listar_imagenes' %}" class="custom-button">Listado de Imágenes</a>
 </div>
 
 <br>
+
+<div>
+    <a href="{% url 'consultar_archivos' %}" class="custom-button">Consultar Archivos</a>
+</div>
+
+<style>
+    .custom-button {
+        background-color: #2f657a; /* Color de fondo azul */
+        color: white; /* Color de texto blanco */
+        padding: 10px 20px; /* Espaciado interno */
+        border: none; /* Sin borde */
+        border-radius: 5px; /* Bordes redondeados */
+        text-align: center; /* Centrar texto */
+        text-decoration: none; /* Sin subrayado */
+        display: inline-block; /* Mostrar en línea */
+        font-size: 16px; /* Tamaño de fuente */
+        margin: 5px 2px; /* Margen entre botones */
+        cursor: pointer; /* Cambiar cursor al pasar por encima */
+    }
+
+    .custom-button:hover {
+        background-color: #181818; /* Color de fondo más oscuro al pasar por encima */
+        color: white; /* Color de texto blanco */
+    }
+</style>
 
 {% endblock %}
-

@@ -1,11 +1,34 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-    <h1 class="text-center">Confirmar Eliminación de Archivos Media</h1>
-    <form method="post">
-        {% csrf_token %}
-        <p>¿Estás seguro de que deseas eliminar todos los archivos multimedia? Esta acción es irreversible.</p>
-        <button type="submit">Sí, eliminar todos los archivos</button>
-        <a href="{% url 'admin:index' %}">Cancelar</a>
-    </form>
+<h1>Confirmar Eliminación</h1>
+<p>¿Estás seguro de que deseas eliminar todo el contenido de la carpeta MEDIA?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="custom-button">Confirmar Eliminación</button>
+    <a href="{% url 'admin:index' %}" class="custom-button">Cancelar</a>
+</form>
+
+<style>
+    .custom-button {
+        background-color: #2f657a; 
+        color: white; 
+        padding: 10px 20px; 
+        border: none; 
+        border-radius: 5px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 16px; 
+        margin: 5px 2px; 
+        cursor: pointer; 
+    }
+
+    .custom-button:hover {
+        background-color: #181818; 
+        color: white; 
+    }
+</style>
+
 {% endblock %}

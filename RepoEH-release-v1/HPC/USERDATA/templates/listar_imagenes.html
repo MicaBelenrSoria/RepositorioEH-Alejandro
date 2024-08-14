@@ -14,7 +14,7 @@
     <h2>Alumno: {{ alumno_id }}</h2>
     <ul>
         {% for image in images %}
-        <li>
+        <ol>
             <img src="{{ image.url }}" alt="{{ image.name }}" style="max-width: 200px;">
             <div>
                 <form method="post" action="{% url 'accept_image' image.name %}" style="display:inline;">
@@ -26,7 +26,7 @@
                     <button type="submit">Rechazar</button>
                 </form>
             </div>
-        </li>
+        </ol>
         {% endfor %}
     </ul>
 {% endfor %}

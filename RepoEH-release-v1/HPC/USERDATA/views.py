@@ -998,26 +998,33 @@ def download_media(request):
 
 @staff_member_required
 def delete_media(request):
-    if request.method == 'POST':
-        # Redirigir a la vista de confirmación
-        return redirect('confirm_delete_media')
-    else:
-        # Mostrar una página de información si no es POST
-        return HttpResponse("Método no permitido. Usa POST para confirmar la eliminación.")
+    media_root = settings.MEDIA_ROOT
+
+    if request.method == "POST":
+        if os.path.exists(media_root):
+            try:
+                shutil.rmtree(media_root)
+                os.makedirs(media_root)  # Crear nuevamente la carpeta vacía
+                messages.success(request, "El contenido de la carpeta MEDIA ha sido eliminado exitosamente.")
+            except Exception as e:
+                messages.error(request, f"Error al eliminar el contenido de la carpeta MEDIA: {e}")
+        else:
+            messages.error(request, "La carpeta MEDIA no existe.")
+        
+        return redirect('admin:index')
+
+    return redirect('confirm_delete_media')
     
 @staff_member_required
 def confirm_delete_media(request):
     if request.method == 'POST':
-        # Eliminar los archivos multimedia
         media_root = settings.MEDIA_ROOT
         for root, dirs, files in os.walk(media_root):
             for file in files:
                 file_path = os.path.join(root, file)
                 os.remove(file_path)
-        # Redirigir al inicio después de eliminar los archivos
-        return redirect('admin:index')  # Ajusta esta URL si es necesario
+        return redirect('admin:index')  
     else:
-        # Mostrar la página de confirmación
         return render(request, 'confirm_delete_media.html')
 
 @staff_member_required
@@ -1029,8 +1036,6 @@ def accept_image(request, image_name):
         accepted_folder = os.path.join(media_root, 'certificates', 'documentacion_aceptada')
         if not os.path.exists(accepted_folder):
             os.makedirs(accepted_folder)
-        
-        # Renombrar y mover la imagen a la carpeta 'documentacion_aceptada'
         new_file_name = image_name.replace('.', '_ok.')
         new_file_path = os.path.join(accepted_folder, new_file_name)
         os.rename(original_file_path, new_file_path)
@@ -1051,8 +1056,6 @@ def reject_image(request, image_name):
         rejected_folder = os.path.join(media_root, 'certificates', 'documentacion_rechazada')
         if not os.path.exists(rejected_folder):
             os.makedirs(rejected_folder)
-        
-        # Mover la imagen a la carpeta 'documentacion_rechazada' sin cambiar el nombre
         new_file_path = os.path.join(rejected_folder, image_name)
         os.rename(original_file_path, new_file_path)
         
@@ -1089,10 +1092,8 @@ def listar_imagenes(request):
     media_url = settings.MEDIA_URL
     images_by_alumno = {}
 
-    # Caminamos por el directorio 'certificates'
     for root, dirs, files in os.walk(os.path.join(media_root, 'certificates')):
         for file in files:
-            # Excluir imágenes en las carpetas 'documentacion_aceptada' y 'documentacion_rechazada'
             if 'documentacion_aceptada' not in root and 'documentacion_rechazada' not in root:
                 partes_nombre = file.split('_')
                 if len(partes_nombre) > 1:
@@ -1105,3 +1106,55 @@ def listar_imagenes(request):
                     })
 
     return render(request, 'listar_imagenes.html', {'images_by_alumno': images_by_alumno})
+
+
+@staff_member_required
+def consultar_archivos(request):
+    media_root = settings.MEDIA_ROOT
+    certificates_folder = os.path.join(media_root, 'certificates')
+
+    accepted_images = {}
+    rejected_images = {}
+    pending_images = {}
+
+    for root, dirs, files in os.walk(certificates_folder):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file.endswith('_ok.jpg'):
+                alumno_id = file.split('_')[0]
+                accepted_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', file), 'name': file})
+            elif 'documentacion_rechazada' in root:
+                alumno_id = file.split('_')[0]
+                rejected_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', 'documentacion_rechazada', file), 'name': file})
+            else:
+                alumno_id = file.split('_')[0]
+                pending_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', file), 'name': file})
+
+    context = {
+        'accepted_images': accepted_images,
+        'rejected_images': rejected_images,
+        'pending_images': pending_images,
+    }
+
+    return render(request, 'consultar_archivos.html', context)
+
+
+@staff_member_required
+def descargar_contenido_media(request):
+    # Crear un archivo ZIP en memoria
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w') as zf:
+        media_root = settings.MEDIA_ROOT
+
+        # Recorrer los archivos y añadirlos al ZIP
+        for root, dirs, files in os.walk(media_root):
+            for file in files:
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, media_root)
+                zf.write(file_path, relative_path)
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=media_content.zip'
+
+    return response
