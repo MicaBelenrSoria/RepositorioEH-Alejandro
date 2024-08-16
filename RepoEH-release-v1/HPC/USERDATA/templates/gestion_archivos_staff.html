@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <div>
+        <a href="{% url 'admin_download_media' %}" class="button">DESCARAGA DE CARPETA MEDIA</a>
+    </div>
+
+    <br>
+
+    <div>
+        <a href="{% url 'admin_delete_media' %}" class="button">ELIMINA CARPETA MEDIA</a>
+    </div>
+
+    <br>
+
+    <div>
+        <a href="{% url 'listar_imagenes' %}" class="button">LISTA LAS IMAGENES</a>
+    </div>
+
+    <br>
+
+    <div>
+        <a href="{% url 'consultar_archivos' %}" class="button">CONSULTA DE ARCHIVOS</a>
+    </div>
+
+{% endblock %}

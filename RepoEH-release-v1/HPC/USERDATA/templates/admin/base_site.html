@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Panel Administrador Hipocampo</a></h1>
+<a href="{% url 'gestion_archivos_staff' %}" class="button">Gestión de Archivos</a>
+{% endblock %}
+
+{% block content %}
+<div id="content" class="colMS">
+    <h1>Sitio administrativo</h1>
+    <div id="content-main"></div>
+    <div id="content-related">
+        <div class="module" id="recent-actions-module">
+            <h2>Acciones recientes</h2>
+            <h3>Mis acciones</h3>
+            <ul class="actionlist">
+                <li class="addlink">...</li>
+                <li class="changelink">...</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

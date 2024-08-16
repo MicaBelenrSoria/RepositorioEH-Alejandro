@@ -978,6 +978,13 @@ def upload_certificate(request):
 def upload_success(request):
     return render(request, 'upload_success.html')
 
+
+
+def gestion_archivos_staff(request):
+    # Lógica de la vista aquí
+    return render(request, 'gestion_archivos_staff.html')
+
+
 @staff_member_required
 def download_media(request):
     media_folder = settings.MEDIA_ROOT
