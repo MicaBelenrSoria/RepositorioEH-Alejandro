@@ -1,9 +1,9 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-<h1>Documentación de Alumnos</h1>
+<h1 style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">Documentación de Alumnos</h1>
 
-<div>
+<div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
     <button id="btn-accepted" onclick="showAccepted()" class="custom-button">Documentación Aceptada</button>
     <button id="btn-rejected" onclick="showRejected()" class="custom-button">Documentación Rechazada</button>
     <button id="btn-pending" onclick="showPending()" class="custom-button">Pendientes de Validación</button>
@@ -78,14 +78,10 @@
     .custom-button {
         background-color: #2f657a; 
         color: white; 
-        padding: 10px 20px; 
+        padding: 15px 30px; 
         border: none; 
         border-radius: 5px; 
-        text-align: center; 
-        text-decoration: none; 
-        display: inline-block; 
         font-size: 16px; 
-        margin: 5px 2px; 
         cursor: pointer; 
     }
 

@@ -1,26 +1,24 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-    <div>
-        <a href="{% url 'admin_download_media' %}" class="button">DESCARAGA DE CARPETA MEDIA</a>
-    </div>
-
     <br>
-
-    <div>
-        <a href="{% url 'admin_delete_media' %}" class="button">ELIMINA CARPETA MEDIA</a>
-    </div>
-
     <br>
-
-    <div>
-        <a href="{% url 'listar_imagenes' %}" class="button">LISTA LAS IMAGENES</a>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'admin_download_media' %}" class="button" style="font-size: 18px; padding: 15px 30px;">DESCARGA DE CARPETA MEDIA</a>
     </div>
-
     <br>
-
-    <div>
-        <a href="{% url 'consultar_archivos' %}" class="button">CONSULTA DE ARCHIVOS</a>
+    <br>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'admin_delete_media' %}" class="button" style="font-size: 18px; padding: 15px 30px;">ELIMINA CARPETA MEDIA</a>
     </div>
-
+    <br>
+    <br>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'listar_imagenes' %}" class="button" style="font-size: 18px; padding: 15px 30px;">LISTADO DE IMÁGENES</a>
+    </div>
+    <br>
+    <br>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'consultar_archivos' %}" class="button" style="font-size: 18px; padding: 15px 30px;">CONSULTA DE ARCHIVOS</a>
+    </div>
 {% endblock %}

@@ -2,7 +2,9 @@
 
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">Panel Administrador Hipocampo</a></h1>
-<a href="{% url 'gestion_archivos_staff' %}" class="button">Gestión de Archivos</a>
+<div style="text-align: left;">
+    <a href="{% url 'gestion_archivos_staff' %}" class="button" style="background-color: red; color: white;">Gestión de Archivos</a>
+</div>
 {% endblock %}
 
 {% block content %}
