@@ -194,3 +194,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
+
+# AWS SES
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email-smtp.us-east-2.amazonaws.com'  
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'AKIAR3HUOTMABUNW3YL6'  # nombre de usuario SMTP
+EMAIL_HOST_PASSWORD = 'BHnEYSjWWKNhBji1z4LsHAaXrXp4SbZhXkSIZ5qYcSF9'  #contraseña SMTP
+DEFAULT_FROM_EMAIL = 'micabelenrs@gmail.com'  # email verificado del SMTP

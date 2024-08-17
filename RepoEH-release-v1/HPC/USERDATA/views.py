@@ -1054,6 +1054,35 @@ def accept_image(request, image_name):
     return redirect('listar_imagenes')
 
 
+# @staff_member_required
+# def reject_image(request, image_name):
+#     media_root = settings.MEDIA_ROOT
+#     original_file_path = os.path.join(media_root, 'certificates', image_name)
+
+#     if os.path.exists(original_file_path):
+#         # Mover la imagen a la carpeta de imágenes rechazadas
+#         rejected_folder = os.path.join(media_root, 'certificates', 'documentacion_rechazada')
+#         if not os.path.exists(rejected_folder):
+#             os.makedirs(rejected_folder)
+#         new_file_path = os.path.join(rejected_folder, image_name)
+#         os.rename(original_file_path, new_file_path)
+
+#         # Enviar correo de notificación
+#         send_mail(
+#             'Notificación de rechazo de imagen',
+#             f'Su imagen {image_name} ha sido rechazada y movida a la carpeta de documentación rechazada.',
+#             'micabelenrs@gmail.com',  # De (correo del remitente)
+#             ['micabelenrs@gmail.com'],  # Para (correo del destinatario, en este caso el mismo)
+#             fail_silently=False,
+#         )
+        
+#         # Mostrar mensaje de error en la interfaz
+#         messages.error(request, f"Imagen rechazada y movida a 'documentacion_rechazada'.")
+#     else:
+#         messages.error(request, f"El archivo no se encuentra en el directorio de medios.")
+
+#     return redirect('listar_imagenes')
+
 @staff_member_required
 def reject_image(request, image_name):
     media_root = settings.MEDIA_ROOT
@@ -1065,12 +1094,35 @@ def reject_image(request, image_name):
             os.makedirs(rejected_folder)
         new_file_path = os.path.join(rejected_folder, image_name)
         os.rename(original_file_path, new_file_path)
-        
-        messages.error(request, f"Imagen rechazada y movida a 'documentacion_rechazada'.")
+
+        # motivo del rechazo
+        if 'AM' in image_name:
+            motivo = "Fue rechazado el apto medico provisto para el alumno. Por favor contactarse con la escuela."
+        elif 'OS' in image_name:
+            motivo = "Fue rechazado el carnet de obra social provisto para el alumno. Por favor contactarse con la escuela."
+        else:
+            motivo = "Motivo no especificado."
+
+        notificacion_rechazo(image_name, motivo)
+
+        messages.success(request, f"Imagen rechazada, movida a 'documentacion_rechazada', y notificación enviada por correo.")
     else:
         messages.error(request, f"El archivo no se encuentra en el directorio de medios.")
 
     return redirect('listar_imagenes')
+
+
+def notificacion_rechazo(image_name, motivo):
+    asunto = "Notificación de rechazo de imagen"
+    mensaje = f"Su imagen {image_name} ha sido rechazada. Motivo: {motivo}"
+    remitente = settings.DEFAULT_FROM_EMAIL
+    destinatario = [remitente]  
+
+    try:
+        send_mail(asunto, mensaje, remitente, destinatario, fail_silently=False)
+    except Exception as e:
+        print(f"Error al enviar la notificación de rechazo: {e}")
+
 
 @staff_member_required
 def index(request):
@@ -1165,3 +1217,16 @@ def descargar_contenido_media(request):
     response['Content-Disposition'] = 'attachment; filename=media_content.zip'
 
     return response
+
+from django.core.mail import send_mail
+from django.http import HttpResponse
+
+def send_test_email(request):
+    send_mail(
+        'Asunto del correo de prueba',
+        'Este es el cuerpo del correo de prueba.',
+        'micabelenrs@gmail.com',  # De
+        ['micabelenrs@gmail.com'],  # Para
+        fail_silently=False,
+    )
+    return HttpResponse('Correo de prueba enviado.')
