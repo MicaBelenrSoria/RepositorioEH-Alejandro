@@ -25,12 +25,16 @@
                             {{ form.delete_health_insurance_card }}
                         </div>
                         <br>
-                        <button class="btn btn-outline-light mt-2 mb-5 w-100 elegir_alumno" id="upload_certificate_button" type="submit">
+                        <button class="btn btn-outline-light mt-2 mb-5 w-100" id="upload_certificate_button" type="submit">
                             <b>Subir</b>
                         </button>
                     </div>
                 </div>
             </form>
+            <div class="text-center">
+                <a href="{% url 'home' %}" class="btn btn-outline-light buttom_inicio">Inicio</a>
+            </div>
+            <br>
         </div>
     {% else %}
         <p class="text-center">Por favor, <a href="{% url 'login' %}">inicia sesión</a> para subir certificados.</p>

@@ -30,6 +30,11 @@ a.nav-link{
     background-color: #e3d827;
 }
 
+.buttom_inicio{
+    background-color: transparent;
+    color: black; 
+}
+
 .titulo_ins_colonia{
     color: white;
 }
@@ -42,6 +47,10 @@ a.nav-link{
 
 .nav-fondo{
     background-color: #6e4e8b;
+}
+
+#site-name a {
+    color: #6e4e8b !important;
 }
 
 /* ---------------------------------------------------------------------------------------------------------------------------- */
