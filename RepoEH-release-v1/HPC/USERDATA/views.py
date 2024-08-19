@@ -1054,35 +1054,6 @@ def accept_image(request, image_name):
     return redirect('listar_imagenes')
 
 
-# @staff_member_required
-# def reject_image(request, image_name):
-#     media_root = settings.MEDIA_ROOT
-#     original_file_path = os.path.join(media_root, 'certificates', image_name)
-
-#     if os.path.exists(original_file_path):
-#         # Mover la imagen a la carpeta de imágenes rechazadas
-#         rejected_folder = os.path.join(media_root, 'certificates', 'documentacion_rechazada')
-#         if not os.path.exists(rejected_folder):
-#             os.makedirs(rejected_folder)
-#         new_file_path = os.path.join(rejected_folder, image_name)
-#         os.rename(original_file_path, new_file_path)
-
-#         # Enviar correo de notificación
-#         send_mail(
-#             'Notificación de rechazo de imagen',
-#             f'Su imagen {image_name} ha sido rechazada y movida a la carpeta de documentación rechazada.',
-#             'micabelenrs@gmail.com',  # De (correo del remitente)
-#             ['micabelenrs@gmail.com'],  # Para (correo del destinatario, en este caso el mismo)
-#             fail_silently=False,
-#         )
-        
-#         # Mostrar mensaje de error en la interfaz
-#         messages.error(request, f"Imagen rechazada y movida a 'documentacion_rechazada'.")
-#     else:
-#         messages.error(request, f"El archivo no se encuentra en el directorio de medios.")
-
-#     return redirect('listar_imagenes')
-
 @staff_member_required
 def reject_image(request, image_name):
     media_root = settings.MEDIA_ROOT
@@ -1230,3 +1201,16 @@ def send_test_email(request):
         fail_silently=False,
     )
     return HttpResponse('Correo de prueba enviado.')
+
+from django.contrib.auth import views as auth_views
+
+@login_required
+def custom_password_reset_view(request):
+    
+    if not request.user.is_superuser and not request.user.is_staff:
+        return auth_views.PasswordResetView.as_view(
+            template_name='registration/custom_password_reset_form.html'
+        )(request)
+    else:
+       
+        return redirect('home') 

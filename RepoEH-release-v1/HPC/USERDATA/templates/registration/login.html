@@ -10,18 +10,19 @@
 
     <div class="card mx-auto" style="width: 28em;">
       <div class="card-body">
-        <h5 class="card-title">Iniciar sesion</h5>
+        <h5 class="card-title">Iniciar sesión</h5>
         {{ form | crispy }}
-        <a href= {% url 'home' %} class="card-link">Inicio</a>
-        <a href= {% url 'register' %} class="card-link">Registrarse</a>
-        <button class="btn btn-sm btn-primary float-end" type="submit">Iniciar Sesión</button>
+        <div class="d-flex justify-content-center mt-3">
+          <a href="{% url 'register' %}" class="btn btn-sm btn-primary me-2" type="submit" style="background-color: #6e4e8b; border-color: #6e4e8b;">Registrarse</a>
+          <button class="btn btn-sm btn-primary me-2" type="submit" style="background-color: #6e4e8b; border-color: #6e4e8b;">Iniciar Sesión</button>
+        </div>
+        <a href="{% url 'password_reset' %}" class="d-block mt-3 text-center btn-violeta">¿Olvidaste tu contraseña?</a>
+        
+        <!-- <a href="{% url 'home' %}" class="btn btn-link">Inicio</a> -->
       </div>
     </div>
-</form>
+  
+  </form>
   
 </main>
-
-
-
-
-  {% endblock %}
+{% endblock %}
