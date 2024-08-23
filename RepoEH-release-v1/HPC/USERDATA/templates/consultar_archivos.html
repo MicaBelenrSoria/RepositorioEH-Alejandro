@@ -15,9 +15,10 @@
         <h3>Alumno: {{ alumno_id }}</h3>
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in images %}
-                <div style="margin: 10px;">
+                <div style="margin: 10px; text-align: center;">
                     <img src="{{ image.url }}" alt="Imagen aceptada" style="max-width: 200px; max-height: 200px;">
                     <p>{{ image.name }}</p>
+                    <a href="{{ image.url }}" download="{{ image.name }}" class="download-button">Descargar</a>
                 </div>
             {% endfor %}
         </div>
@@ -30,9 +31,10 @@
         <h3>Alumno: {{ alumno_id }}</h3>
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in images %}
-                <div style="margin: 10px;">
+                <div style="margin: 10px; text-align: center;">
                     <img src="{{ image.url }}" alt="Imagen rechazada" style="max-width: 200px; max-height: 200px;">
                     <p>{{ image.name }}</p>
+                    <a href="{{ image.url }}" download="{{ image.name }}" class="download-button">Descargar</a>
                 </div>
             {% endfor %}
         </div>
@@ -45,9 +47,10 @@
         <h3>Alumno: {{ alumno_id }}</h3>
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in images %}
-                <div style="margin: 10px;">
+                <div style="margin: 10px; text-align: center;">
                     <img src="{{ image.url }}" alt="Imagen pendiente" style="max-width: 200px; max-height: 200px;">
                     <p>{{ image.name }}</p>
+                    <a href="{{ image.url }}" download="{{ image.name }}" class="download-button">Descargar</a>
                 </div>
             {% endfor %}
         </div>
@@ -88,6 +91,22 @@
     .custom-button:hover {
         background-color: #181818; 
         color: white; 
+    }
+
+    .download-button {
+        display: inline-block;
+        margin-top: 5px;
+        background-color: #2f657a;
+        color: white;
+        padding: 8px 15px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .download-button:hover {
+        background-color: #2f657a;
+        color: white;
     }
 </style>
 {% endblock %}

@@ -1082,15 +1082,20 @@ def reject_image(request, image_name):
 
     return redirect('listar_imagenes')
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 def notificacion_rechazo(image_name, motivo):
+    print("Intentando enviar correo...")  # Agregar este print
     asunto = "Notificación de rechazo de imagen"
     mensaje = f"Su imagen {image_name} ha sido rechazada. Motivo: {motivo}"
     remitente = settings.DEFAULT_FROM_EMAIL
-    destinatario = [remitente]  
+    destinatario = [remitente]
 
     try:
         send_mail(asunto, mensaje, remitente, destinatario, fail_silently=False)
+        print("Correo enviado exitosamente.")
     except Exception as e:
         print(f"Error al enviar la notificación de rechazo: {e}")
 
@@ -1121,6 +1126,7 @@ def listar_imagenes(request):
     media_root = settings.MEDIA_ROOT
     media_url = settings.MEDIA_URL
     images_by_alumno = {}
+    displayed = False
 
     for root, dirs, files in os.walk(os.path.join(media_root, 'certificates')):
         for file in files:
@@ -1150,15 +1156,30 @@ def consultar_archivos(request):
     for root, dirs, files in os.walk(certificates_folder):
         for file in files:
             file_path = os.path.join(root, file)
-            if file.endswith('_ok.jpg'):
+            
+            # Verificar si la imagen está en la carpeta 'documentacion_aceptada'
+            if 'documentacion_aceptada' in root:
                 alumno_id = file.split('_')[0]
-                accepted_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', file), 'name': file})
+                accepted_images.setdefault(alumno_id, []).append({
+                    'url': os.path.join(settings.MEDIA_URL, 'certificates', 'documentacion_aceptada', file),
+                    'name': file
+                })
+            
+            # Verificar si la imagen está en la carpeta 'documentacion_rechazada'
             elif 'documentacion_rechazada' in root:
                 alumno_id = file.split('_')[0]
-                rejected_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', 'documentacion_rechazada', file), 'name': file})
+                rejected_images.setdefault(alumno_id, []).append({
+                    'url': os.path.join(settings.MEDIA_URL, 'certificates', 'documentacion_rechazada', file),
+                    'name': file
+                })
+            
+            # Asumir que si no está en 'documentacion_aceptada' o 'documentacion_rechazada', es una imagen pendiente
             else:
                 alumno_id = file.split('_')[0]
-                pending_images.setdefault(alumno_id, []).append({'url': os.path.join(settings.MEDIA_URL, 'certificates', file), 'name': file})
+                pending_images.setdefault(alumno_id, []).append({
+                    'url': os.path.join(settings.MEDIA_URL, 'certificates', file),
+                    'name': file
+                })
 
     context = {
         'accepted_images': accepted_images,
@@ -1193,14 +1214,17 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 
 def send_test_email(request):
-    send_mail(
-        'Asunto del correo de prueba',
-        'Este es el cuerpo del correo de prueba.',
-        'micabelenrs@gmail.com',  # De
-        ['micabelenrs@gmail.com'],  # Para
-        fail_silently=False,
-    )
-    return HttpResponse('Correo de prueba enviado.')
+    try:
+        send_mail(
+            'Asunto del correo de prueba',
+            'Este es el cuerpo del correo de prueba.',
+            'micabelenrs@gmail.com',  # De
+            ['micabelenrs@gmail.com'],  # Para
+            fail_silently=False,
+        )
+        return HttpResponse('Correo de prueba enviado.')
+    except Exception as e:
+        return HttpResponse(f"Error al enviar el correo: {e}")
 
 from django.contrib.auth import views as auth_views
 
