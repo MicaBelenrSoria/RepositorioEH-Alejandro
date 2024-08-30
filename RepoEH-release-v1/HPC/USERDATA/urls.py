@@ -8,7 +8,7 @@ from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
-    path('', home, name='home'),
+    path('', views.home, name='home'),
     path('actividades_por_nombre/', actividades_por_nombre, name='actividades_por_nombre'),
     path('datos_alumno/', datos_alumno, name='datos_alumno'),
     path('datos_alumno1/', datos_alumno1, name='datos_alumno1'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('upload-certificate/', views.upload_certificate, name='upload_certificate'),
     path('upload-success/', views.upload_success, name='upload_success'),
     
+    path('datos-personales/', views.datos_personales, name='datos_personales'),
     path('gestion_archivos/', views.gestion_archivos_staff, name='gestion_archivos_staff'),
     path('admin/download-media/', views.download_media, name='admin_download_media'),
     path('admin/delete_media/', views.delete_media, name='admin_delete_media'),
@@ -35,14 +36,17 @@ urlpatterns = [
     path('listar-imagenes/', views.listar_imagenes, name='listar_imagenes'),
     path('consultar-archivos/', consultar_archivos, name='consultar_archivos'),
     path('descargar-contenido-media/', descargar_contenido_media, name='descargar_contenido_media'),
+
     # URLs de recuperación de contraseña
     path('send-email/', views.send_test_email, name='send_test_email'),
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
+    
     # Vista para ingresar una nueva contraseña
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'), name='password_reset_confirm'),
+    
     # Vista para confirmar que la contraseña que se ah cambiado
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
     path('password_reset/', auth_views.PasswordResetView.as_view(email_template_name='registration/password_reset_email.html',subject_template_name='registration/password_reset_subject.txt',), name='password_reset'),

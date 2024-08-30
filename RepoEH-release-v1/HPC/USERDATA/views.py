@@ -27,8 +27,130 @@ import shutil
 from .models import Documentacion
 
 # Create your views here.
+@login_required
 def home(request):
+    # Obtener el número de documento del usuario actual
+    documento = request.user.username
+    
+    # Consultar la base de datos externa
+    with connections['default1'].cursor() as cursor:
+        cursor.execute("SELECT nombre, apellido, telefono FROM vw_web_alumnos WHERE documento = %s", [documento])
+        result = cursor.fetchone()
+    
+    # Verificar si los datos personales están completos
+    if result is None or any(field is None or field == '' for field in result):
+        # Enviar por session el dato "documento" y redirigir al formulario "datos_personales" para completar los datos_personales
+        request.session['documento'] = documento
+        return redirect('datos_personales')
+    
+    # Renderizar la página de inicio si los datos personales están completos
     return render(request, 'home.html')
+
+@login_required
+def datos_personales(request):
+    documento = request.session.get('documento', request.user.username)
+
+    try:
+        with connections['default1'].cursor() as cursor:
+            cursor.execute("SELECT * FROM vw_web_alumnos WHERE documento = %s", [documento])
+            resultado = cursor.fetchone()
+        
+        if resultado:
+            id_alumno = resultado[0]
+            form_user = AlumnoForm(initial={
+                'apellido': resultado[1] if resultado[1] else '',
+                'nombre': resultado[2] if resultado[2] else '',
+                'dni': resultado[3] if resultado[3] else '',
+                'fechanacimiento': resultado[4] if resultado[4] else '',
+                'sexo': resultado[5] if resultado[5] else '',
+                'domicilio': resultado[7] if resultado[7] else '',
+                'codigopostal': resultado[8] if resultado[8] else '',
+                'provincia': resultado[10] if resultado[10] else '',
+                'telefono': resultado[11] if resultado[11] else '',
+                'celular': resultado[12] if resultado[12] else '',
+                'email': resultado[13] if resultado[13] else '',
+                'colegio': resultado[30] if resultado[30] else '',
+                'dificultadfisica': resultado[21] if resultado[21] else '',
+                'tratamientopsicologico': resultado[22] if resultado[22] else '',
+                'esalergico': resultado[47] if resultado[47] else '',
+                'estemerosoaagua': resultado[26] if resultado[26] else '',
+                'flotaenloprofundo': resultado[27] if resultado[27] else '',
+                'nivel_ed': resultado[29] if resultado[29] else '',
+                'observaciones': resultado[21] if resultado[21] else '',
+                'preferenciaamigos': resultado[24] if resultado[24] else '',
+                'padre': resultado[38] if resultado[38] else '',
+                'padrecelular': resultado[39] if resultado[39] else '',
+                'padreemail': resultado[40] if resultado[40] else '',
+                'padredni': resultado[41] if resultado[41] else '',
+                'madre': resultado[42] if resultado[42] else '',
+                'madrecelular': resultado[43] if resultado[43] else '',
+                'madreemail': resultado[44] if resultado[44] else '',
+                'madredni': resultado[45] if resultado[45] else '',
+                'utilizamicrocolonia': resultado[28] if resultado[28] else ''
+            })
+        else:
+            form_user = AlumnoForm()
+
+        niveles_disp = Nivel_educativo.objects.all()
+
+        if request.method == 'POST':
+            data_form = AlumnoForm(request.POST)
+            if data_form.is_valid():
+                data = data_form.cleaned_data
+                with connections['default1'].cursor() as cursor:
+                    cursor.execute(
+                        """
+                        EXEC SP_WEB_ALUMNOMODIFICACION %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        """,
+                        [
+                            id_alumno,
+                            data['apellido'],
+                            data['nombre'],
+                            data['dni'],
+                            data['fechanacimiento'],
+                            data['sexo'],
+                            data['domicilio'],
+                            data['codigopostal'],
+                            data['provincia'],
+                            data['telefono'],
+                            data['celular'],
+                            data['email'],
+                            data['dni'],  # USUARIOWEB
+                            resultado[20],  # PASSWORDWEB
+                            data['nivel_ed'],
+                            data['colegio'],
+                            data['dificultadfisica'],
+                            data['tratamientopsicologico'],
+                            data['esalergico'],
+                            data['estemerosoaagua'],
+                            data['flotaenloprofundo'],
+                            data['observaciones'],
+                            data['preferenciaamigos'],
+                            data['padre'],
+                            data['padrecelular'],
+                            data['padreemail'],
+                            data['padredni'],
+                            data['madre'],
+                            data['madrecelular'],
+                            data['madreemail'],
+                            data['madredni'],
+                            0  # utilizamicrocolonia
+                        ]
+                    )
+                return redirect('home')
+            else:
+                context = {'code': 500, 'message': data_form.errors}
+                return render(request, 'errorhandler.html', context=context)
+
+    except Exception as e:
+        context = {'code': 500, 'message': str(e)}
+        return render(request, 'errorhandler.html', context=context)
+
+    return render(request, 'datos_personales.html', {
+        'form': form_user,
+        'niveles': niveles_disp,
+        'documento': documento
+    })
 
 
 def sucess(request):
@@ -94,35 +216,35 @@ def my_view(request):
     return render(request, 'alumno_modificacion.html', {'form': form})
 
 class AlumnoForm(forms.Form):
-    nivel_ed = forms.IntegerField(label='Nivel educativo')
+    nivel_ed = forms.IntegerField(label='Nivel educativo', required=False)
    # nivel_ed = forms.ChoiceField(label='Nivel Educativo', choices=Nivel_educativo.choices)
     apellido = forms.CharField(label='Apellido', max_length=500)
     nombre = forms.CharField(label='Nombre', max_length=500)
     dni = forms.CharField(label='DNI', max_length=500)
     fechanacimiento = forms.DateField(label='Fecha de Nacimiento')
     sexo = forms.CharField(label='Sexo', max_length=1)
-    domicilio = forms.CharField(label='Domicilio', max_length=500)
-    codigopostal = forms.CharField(label='Código Postal', max_length=500)
-    provincia = forms.CharField(label='Provincia', max_length=500)
-    telefono = forms.CharField(label='Teléfono', max_length=500)
-    celular = forms.CharField(label='Celular', max_length=500)
-    email = forms.EmailField(label='Email')
-    colegio = forms.CharField(label='Colegio', max_length=500)
-    dificultadfisica = forms.CharField(label='Dificultad Física', max_length=500)
-    tratamientopsicologico = forms.CharField(label='Tratamiento Psicológico', max_length=500)
-    esalergico = forms.CharField(label='Es Alergico', max_length=500)
+    domicilio = forms.CharField(label='Domicilio', max_length=500, required=False)
+    codigopostal = forms.CharField(label='Código Postal', max_length=500, required=False)
+    provincia = forms.CharField(label='Provincia', max_length=500, required=False)
+    telefono = forms.CharField(label='Teléfono', max_length=500, required=False)
+    celular = forms.CharField(label='Celular', max_length=500, required=False)
+    email = forms.EmailField(label='Email', required=False)
+    colegio = forms.CharField(label='Colegio', max_length=500, required=False)
+    dificultadfisica = forms.CharField(label='Dificultad Física', max_length=500, required=False)
+    tratamientopsicologico = forms.CharField(label='Tratamiento Psicológico', max_length=500, required=False)
+    esalergico = forms.CharField(label='Es Alergico', max_length=500, required=False)
     estemerosoaagua = forms.BooleanField(label='Estemeroso a Agua', required=False)
     flotaenloprofundo = forms.BooleanField(label='Flota en lo Profundo', required=False)    
-    observaciones = forms.CharField(label='Observaciones', max_length=500)
-    preferenciaamigos = forms.CharField(label='Preferencia Amigos', max_length=500)
-    padre = forms.CharField(label='Padre', max_length=500)
-    padrecelular = forms.CharField(label='Padre Celular', max_length=500)
-    padreemail = forms.EmailField(label='Padre Email')
-    padredni = forms.CharField(label='Padre DNI', max_length=500)
-    madre = forms.CharField(label='Madre', max_length=500)
-    madrecelular = forms.CharField(label='Madre Celular', max_length=500)
-    madreemail = forms.EmailField(label='Madre Email')
-    madredni = forms.CharField(label='Madre DNI', max_length=500)
+    observaciones = forms.CharField(label='Observaciones', max_length=500, required=False)
+    preferenciaamigos = forms.CharField(label='Preferencia Amigos', max_length=500, required=False)
+    padre = forms.CharField(label='Padre', max_length=500, required=False)
+    padrecelular = forms.CharField(label='Padre Celular', max_length=500, required=False)
+    padreemail = forms.EmailField(label='Padre Email', required=False)
+    padredni = forms.CharField(label='Padre DNI', max_length=500, required=False)
+    madre = forms.CharField(label='Madre', max_length=500, required=False)
+    madrecelular = forms.CharField(label='Madre Celular', max_length=500, required=False)
+    madreemail = forms.EmailField(label='Madre Email', required=False)
+    madredni = forms.CharField(label='Madre DNI', max_length=500, required=False)
     # new field
     # utilizamicrocolonia = forms.BooleanField(label='Utiliza microcolonia', required=False)
 
@@ -288,6 +410,115 @@ def alumno_modificacion(request):
     except Exception as e:
         context = {'code': 500, 'message': e}
         return render(request, 'errorhandler.html', context=context)
+
+# @login_required
+# def datos_personales(request):
+#     if request.session.get('documento'):
+#         documento = request.session.get('documento')
+#     else:
+#         documento = request.user.username
+
+#     try:
+#         with connections['default1'].cursor() as cursor:
+#             cursor.execute("SELECT * FROM vw_web_alumnos WHERE DOCUMENTO = %s", [documento])
+#             resultado = cursor.fetchone()
+        
+#         if resultado:
+#             id_alumno = resultado[0]
+#             form_user = AlumnoForm(initial={
+#                 'apellido': resultado[1] if resultado[1] else '',
+#                 'nombre': resultado[2] if resultado[2] else '',
+#                 'dni': resultado[3] if resultado[3] else '',
+#                 'fechanacimiento': resultado[4] if resultado[4] else '',
+#                 'sexo': resultado[5] if resultado[5] else '',
+#                 'domicilio': resultado[7] if resultado[7] else '',
+#                 'codigopostal': resultado[8] if resultado[8] else '',
+#                 'provincia': resultado[10] if resultado[10] else '',
+#                 'telefono': resultado[11] if resultado[11] else '',
+#                 'celular': resultado[12] if resultado[12] else '',
+#                 'email': resultado[13] if resultado[13] else '',
+#                 'colegio': resultado[30] if resultado[30] else '',
+#                 'dificultadfisica': resultado[21] if resultado[21] else '',
+#                 'tratamientopsicologico': resultado[22] if resultado[22] else '',
+#                 'esalergico': resultado[47] if resultado[47] else '',
+#                 'estemerosoaagua': resultado[26] if resultado[26] else '',
+#                 'flotaenloprofundo': resultado[27] if resultado[27] else '',
+#                 'nivel_ed': resultado[29] if resultado[29] else '',
+#                 'observaciones': resultado[21] if resultado[21] else '',
+#                 'preferenciaamigos': resultado[24] if resultado[24] else '',
+#                 'padre': resultado[38] if resultado[38] else '',
+#                 'padrecelular': resultado[39] if resultado[39] else '',
+#                 'padreemail': resultado[40] if resultado[40] else '',
+#                 'padredni': resultado[41] if resultado[41] else '',
+#                 'madre': resultado[42] if resultado[42] else '',
+#                 'madrecelular': resultado[43] if resultado[43] else '',
+#                 'madreemail': resultado[44] if resultado[44] else '',
+#                 'madredni': resultado[45] if resultado[45] else '',
+#                 'utilizamicrocolonia': resultado[28] if resultado[28] else ''
+#             })
+#         else:
+#             form_user = AlumnoForm()
+
+#         niveles_disp = Nivel_educativo.objects.all()
+
+#         if request.method == 'POST':
+#             data_form = AlumnoForm(request.POST)
+#             if data_form.is_valid():
+#                 data = data_form.cleaned_data
+#                 with connections['default1'].cursor() as cursor:
+#                     cursor.execute(
+#                         """
+#                         EXEC SP_WEB_ALUMNOMODIFICACION %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+#                         """,
+#                         [
+#                             id_alumno,
+#                             data['apellido'],
+#                             data['nombre'],
+#                             data['dni'],
+#                             data['fechanacimiento'],
+#                             data['sexo'],
+#                             data['domicilio'],
+#                             data['codigopostal'],
+#                             data['provincia'],
+#                             data['telefono'],
+#                             data['celular'],
+#                             data['email'],
+#                             data['dni'],  # USUARIOWEB
+#                             resultado[20],  # PASSWORDWEB
+#                             data['nivel_ed'],
+#                             data['colegio'],
+#                             data['dificultadfisica'],
+#                             data['tratamientopsicologico'],
+#                             data['esalergico'],
+#                             data['estemerosoaagua'],
+#                             data['flotaenloprofundo'],
+#                             data['observaciones'],
+#                             data['preferenciaamigos'],
+#                             data['padre'],
+#                             data['padrecelular'],
+#                             data['padreemail'],
+#                             data['padredni'],
+#                             data['madre'],
+#                             data['madrecelular'],
+#                             data['madreemail'],
+#                             data['madredni'],
+#                             0  # utilizamicrocolonia
+#                         ]
+#                     )
+#                 return redirect('home')
+#             else:
+#                 context = {'code': 500, 'message': data_form.errors}
+#                 return render(request, 'errorhandler.html', context=context)
+
+#     except Exception as e:
+#         context = {'code': 500, 'message': str(e)}
+#         return render(request, 'errorhandler.html', context=context)
+
+#     return render(request, 'datos_personales.html', {
+#         'form': form_user,
+#         'niveles': niveles_disp,
+#         'documento': documento
+#     })
 
 
 # def alumno_modificacion(request):
