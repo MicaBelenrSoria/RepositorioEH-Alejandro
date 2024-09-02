@@ -13,10 +13,10 @@
         <h5 class="card-title">Iniciar sesión</h5>
         {{ form | crispy }}
         <div class="d-flex justify-content-center mt-3">
-          <a href="{% url 'register' %}" class="btn btn-sm btn-primary me-2" type="submit" style="background-color: #6e4e8b; border-color: #6e4e8b;">Registrarse</a>
-          <button class="btn btn-sm btn-primary me-2" type="submit" style="background-color: #6e4e8b; border-color: #6e4e8b;">Iniciar Sesión</button>
+          <button class="btn btn-lg btn-primary mb-2" type="submit" style="background-color: #6e4e8b; border-color: #6e4e8b; width: 100%;">Iniciar Sesión</button>
         </div>
-        <a href="{% url 'password_reset' %}" class="d-block mt-3 text-center btn-violeta">¿Olvidaste tu contraseña?</a>
+        <a href="{% url 'register' %}" class="btn btn-sm btn-primary mb-2" style="background-color: #6e4e8b; border-color: #6e4e8b;">Registrarse</a>
+        <a href="{% url 'password_reset' %}" class="d-block text-center btn-sm" style="color: #6e4e8b;">¿Olvidaste tu contraseña?</a>
         
         <!-- <a href="{% url 'home' %}" class="btn btn-link">Inicio</a> -->
       </div>
