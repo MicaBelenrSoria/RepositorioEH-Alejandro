@@ -1221,12 +1221,26 @@ def download_media(request):
     media_folder = settings.MEDIA_ROOT
     zip_filename = os.path.join(settings.BASE_DIR, 'media.zip')
 
+    # Verifica si la carpeta media contiene archivos
+    has_files = False
+    for foldername, subfolders, filenames in os.walk(media_folder):
+        if filenames:
+            has_files = True
+            break
+
+    # Si la carpeta está vacía, no procede con la descarga
+    if not has_files:
+        messages.error(request, "La carpeta MEDIA no se descarga porque está vacía.")
+        return redirect('admin:index')
+
+    # Crear el archivo ZIP
     with zipfile.ZipFile(zip_filename, 'w') as zip_file:
         for foldername, subfolders, filenames in os.walk(media_folder):
             for filename in filenames:
                 file_path = os.path.join(foldername, filename)
                 zip_file.write(file_path, os.path.relpath(file_path, media_folder))
 
+    # Devolver el archivo ZIP como respuesta
     with open(zip_filename, 'rb') as f:
         response = HttpResponse(f.read(), content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename=media.zip'
@@ -1242,7 +1256,7 @@ def delete_media(request):
         if os.path.exists(media_root):
             try:
                 shutil.rmtree(media_root)
-                os.makedirs(media_root)  # Crear nuevamente la carpeta vacía
+                os.makedirs(media_root)  
                 messages.success(request, "El contenido de la carpeta MEDIA ha sido eliminado exitosamente.")
             except Exception as e:
                 messages.error(request, f"Error al eliminar el contenido de la carpeta MEDIA: {e}")
